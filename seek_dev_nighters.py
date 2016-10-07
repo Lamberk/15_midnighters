@@ -1,5 +1,6 @@
 import requests
 import datetime
+from pytz import timezone
 
 
 DEVMAN_API_URL = 'http://devman.org/api/challenges/solution_attempts/'
@@ -18,10 +19,13 @@ def load_attempts():
 
 
 def is_attempt_after_midnight(attempt):
+    if not attempt['timestamp']:
+        return False
     midnight = datetime.time(0)
     morning = datetime.time(6)
-    dt = datetime.datetime.fromtimestamp(attempt['timestamp'])
-    return (midnight < dt.time() < morning)
+    tz = timezone(attempt['timezone'])
+    time = tz.localize(datetime.datetime.fromtimestamp(attempt['timestamp']))
+    return (midnight < time.time() < morning)
 
 
 def get_midnighters(attemps):
